@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 
-// ── Paste your Web3Forms access key here (get it free at web3forms.com) ──
-const WEB3FORMS_KEY = '9b6d9035-1122-469e-8499-5ff04f048756'
+const WEB3FORMS_KEY      = '9b6d9035-1122-469e-8499-5ff04f048756'
+const ABSTRACT_EMAIL_KEY = 'ff104ff7372f497fb375814e7fda7e3a'
+const ABSTRACT_PHONE_KEY = '76558c81c3bf4d89897ed3a507385e27'
 
 const services = [
   { title: 'Fintech Dashboards', desc: 'Trading platforms, crypto trackers, portfolio managers' },
@@ -18,20 +19,69 @@ const ICONS = [
 ]
 
 export default function Contact() {
-  const [hovered, setHovered]       = useState(null)
-  const [form, setForm]             = useState({ name: '', email: '', confirmEmail: '', project: '', message: '' })
-  const [status, setStatus]         = useState('idle') // idle | sending | success | error
-  const [copied, setCopied]         = useState(false)
-  const [sentEmail, setSentEmail]   = useState('')
+  const [hovered, setHovered]         = useState(null)
+  const [form, setForm]               = useState({ name: '', email: '', confirmEmail: '', phone: '', project: '', message: '' })
+  const [status, setStatus]           = useState('idle') // idle | sending | success | error
+  const [copied, setCopied]           = useState(false)
+  const [sentEmail, setSentEmail]     = useState('')
+  const [emailVerify, setEmailVerify] = useState('idle') // idle | checking | valid | invalid | unknown
+  const [phoneVerify, setPhoneVerify] = useState('idle') // idle | checking | valid | invalid
 
-  const emailMatch  = form.email && form.confirmEmail && form.email === form.confirmEmail
-  const emailNoMatch = form.confirmEmail.length > 0 && form.email !== form.confirmEmail
+  const emailRegex     = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,6}$/
+  const emailFormatOk  = emailRegex.test(form.email)
+  const emailMatch     = emailFormatOk && form.confirmEmail.length > 0 && form.email === form.confirmEmail
+  const emailNoMatch   = form.confirmEmail.length > 0 && form.email !== form.confirmEmail
+  const emailBadFormat = form.email.length > 4 && !emailFormatOk
 
-  const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }))
+  const verifyEmail = useCallback(async () => {
+    if (!emailFormatOk) return
+    setEmailVerify('checking')
+    try {
+      const res  = await fetch(
+        `https://emailvalidation.abstractapi.com/v1/?api_key=${ABSTRACT_EMAIL_KEY}&email=${encodeURIComponent(form.email)}`
+      )
+      const data = await res.json()
+      const deliverable = data.deliverability === 'DELIVERABLE'
+      const mxFound     = data.is_mx_found?.value === true
+      if (deliverable || mxFound)                    setEmailVerify('valid')
+      else if (data.deliverability === 'UNDELIVERABLE') setEmailVerify('invalid')
+      else                                            setEmailVerify('unknown')
+    } catch {
+      setEmailVerify('unknown')
+    }
+  }, [form.email, emailFormatOk])
+
+  const verifyPhone = useCallback(async () => {
+    if (!form.phone || form.phone.trim().length < 7) return
+    setPhoneVerify('checking')
+    // AbstractAPI doesn't accept '+' or spaces — strip both before sending
+    const cleanPhone = form.phone.trim().replace(/^\+/, '').replace(/[\s\-().]/g, '')
+    try {
+      const res  = await fetch(
+        `https://phonevalidation.abstractapi.com/v1/?api_key=${ABSTRACT_PHONE_KEY}&phone=${encodeURIComponent(cleanPhone)}`
+      )
+      const data = await res.json()
+      if (data.valid === true) setPhoneVerify('valid')
+      else                     setPhoneVerify('invalid')
+    } catch {
+      setPhoneVerify('valid') // API error — don't block optional field
+    }
+  }, [form.phone])
+
+  const handleChange = e => {
+    setForm(f => ({ ...f, [e.target.name]: e.target.value }))
+    if (e.target.name === 'email') setEmailVerify('idle')
+    if (e.target.name === 'phone') setPhoneVerify('idle')
+  }
+
+  // Phone is optional — only block if user filled it AND it's invalid
+  const phoneOk = !form.phone || form.phone.trim().length < 3 || phoneVerify === 'valid' || phoneVerify === 'idle'
+
+  const canSubmit = emailMatch && emailVerify !== 'idle' && emailVerify !== 'checking' && emailVerify !== 'invalid' && status !== 'sending'
 
   const handleSubmit = async e => {
     e.preventDefault()
-    if (form.email !== form.confirmEmail) return
+    if (!canSubmit) return
     setStatus('sending')
     setSentEmail(form.email)
     try {
@@ -42,6 +92,8 @@ export default function Contact() {
           access_key: WEB3FORMS_KEY,
           subject: `New Freelance Inquiry: ${form.project}`,
           from_name: form.name,
+          replyto: form.email,
+          botcheck: '',
           ...form,
         }),
       })
@@ -201,15 +253,39 @@ export default function Contact() {
                     />
                   </div>
                   <div style={s.fieldGroup}>
-                    <label style={s.label} htmlFor="cf-email">Your Email</label>
+                    <label style={s.label} htmlFor="cf-email">
+                      Your Email
+                      {emailBadFormat                && <span style={{ color: '#EF5350', marginLeft: 8 }}>✗ Invalid format</span>}
+                      {emailVerify === 'checking'    && <span style={{ color: 'var(--gold)', marginLeft: 8 }}>⟳ Verifying...</span>}
+                      {emailVerify === 'valid'       && <span style={{ color: '#4ADE80',   marginLeft: 8 }}>✓ Email verified</span>}
+                      {emailVerify === 'invalid'     && <span style={{ color: '#EF5350',   marginLeft: 8 }}>✗ Email does not exist</span>}
+                      {emailVerify === 'unknown'     && <span style={{ color: '#F59E0B',   marginLeft: 8 }}>⚠ Could not verify</span>}
+                    </label>
                     <input
                       id="cf-email" name="email" type="email" required
                       value={form.email} onChange={handleChange}
                       placeholder="john@example.com"
-                      style={s.input}
-                      onFocus={e => e.target.style.borderColor = 'var(--gold)'}
-                      onBlur={e  => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+                      onBlur={verifyEmail}
+                      style={{
+                        ...s.input,
+                        borderColor:
+                          emailBadFormat             ? '#EF5350' :
+                          emailVerify === 'valid'    ? '#4ADE80' :
+                          emailVerify === 'invalid'  ? '#EF5350' :
+                          emailVerify === 'checking' ? 'var(--gold)' :
+                          'rgba(255,255,255,0.1)',
+                      }}
                     />
+                    {emailBadFormat && (
+                      <p style={{ color: '#EF5350', fontSize: 12, marginTop: 4 }}>
+                        Enter a valid email like name@domain.com
+                      </p>
+                    )}
+                    {emailVerify === 'invalid' && (
+                      <p style={{ color: '#EF5350', fontSize: 12, marginTop: 4 }}>
+                        This email address does not exist. Please check and try again.
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -233,6 +309,34 @@ export default function Contact() {
                   {emailNoMatch && (
                     <p style={{ color: '#EF5350', fontSize: 12, marginTop: 4 }}>
                       Please make sure both email addresses are the same.
+                    </p>
+                  )}
+                </div>
+
+                <div style={s.fieldGroup}>
+                  <label style={s.label} htmlFor="cf-phone">
+                    Phone Number
+                    <span style={{ color: 'var(--muted)', fontWeight: 400, marginLeft: 6 }}>(Optional)</span>
+                    {phoneVerify === 'checking' && <span style={{ color: 'var(--gold)',  marginLeft: 8 }}>⟳ Verifying...</span>}
+                    {phoneVerify === 'valid'    && <span style={{ color: '#4ADE80',      marginLeft: 8 }}>✓ Valid number</span>}
+                    {phoneVerify === 'invalid'  && <span style={{ color: '#EF5350',      marginLeft: 8 }}>✗ Invalid number</span>}
+                  </label>
+                  <input
+                    id="cf-phone" name="phone" type="tel"
+                    value={form.phone} onChange={handleChange}
+                    onBlur={verifyPhone}
+                    placeholder="+1 555 123 4567 or +91 98765 43210"
+                    style={{
+                      ...s.input,
+                      borderColor:
+                        phoneVerify === 'valid'   ? '#4ADE80' :
+                        phoneVerify === 'invalid' ? '#EF5350' :
+                        'rgba(255,255,255,0.1)',
+                    }}
+                  />
+                  {phoneVerify === 'invalid' && (
+                    <p style={{ color: '#EF5350', fontSize: 12, marginTop: 4 }}>
+                      Enter number with country code, e.g. +91 9876543210
                     </p>
                   )}
                 </div>
@@ -267,16 +371,34 @@ export default function Contact() {
                   />
                 </div>
 
+                {emailVerify === 'invalid' && (
+                  <div style={s.blockMsg}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EF5350" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0 }}>
+                      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    Email address does not exist. Please enter a real email so I can reply to you.
+                  </div>
+                )}
+
+                {!emailMatch && form.confirmEmail.length > 0 && (
+                  <div style={s.blockMsg}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EF5350" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0 }}>
+                      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    Both email fields must match before you can submit.
+                  </div>
+                )}
+
                 {status === 'error' && (
                   <p style={s.errorMsg}>
                     Something went wrong. Please email me directly at shaikhshafik987@gmail.com
                   </p>
                 )}
 
-                <button type="submit" disabled={status === 'sending' || emailNoMatch || !emailMatch} style={{
+                <button type="submit" disabled={!canSubmit} style={{
                   ...s.submitBtn,
-                  opacity: (status === 'sending' || emailNoMatch || !emailMatch) ? 0.5 : 1,
-                  cursor: (status === 'sending' || emailNoMatch || !emailMatch) ? 'not-allowed' : 'pointer',
+                  opacity: canSubmit ? 1 : 0.5,
+                  cursor: canSubmit ? 'pointer' : 'not-allowed',
                 }}>
                   {status === 'sending' ? (
                     <>
@@ -363,6 +485,11 @@ const s = {
   errorMsg: {
     background: 'rgba(239,83,80,0.1)', border: '1px solid rgba(239,83,80,0.3)',
     color: '#EF5350', padding: '10px 14px', borderRadius: 8, fontSize: 13,
+  },
+  blockMsg: {
+    background: 'rgba(239,83,80,0.08)', border: '1px solid rgba(239,83,80,0.25)',
+    color: '#EF5350', padding: '10px 14px', borderRadius: 8, fontSize: 13,
+    display: 'flex', alignItems: 'center', gap: 8, fontWeight: 500,
   },
   submitBtn: {
     background: 'var(--gold)', color: '#0F172A',

@@ -70,7 +70,8 @@ export default function Navbar() {
                 ))}
               </div>
               <a
-                href="mailto:shaikhshafik987@gmail.com"
+                href="#contact"
+                onClick={e => handleScroll(e, 'contact')}
                 style={{
                   background: 'var(--gold)', color: '#0F172A',
                   padding: '9px 22px', borderRadius: 6,

@@ -97,7 +97,14 @@ export default function Hero() {
                 }}
                 style={s.btnGold}
               >View Projects</a>
-              <a href="mailto:shaikhshafik987@gmail.com" style={s.btnPurple}>Hire Me</a>
+              <a
+                href="#contact"
+                onClick={e => {
+                  e.preventDefault()
+                  document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
+                }}
+                style={s.btnPurple}
+              >Hire Me</a>
               <a
                 href="https://github.com/shafik-shaikh"
                 target="_blank"
