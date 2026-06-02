@@ -18,16 +18,22 @@ const ICONS = [
 ]
 
 export default function Contact() {
-  const [hovered, setHovered] = useState(null)
-  const [form, setForm]       = useState({ name: '', email: '', project: '', message: '' })
-  const [status, setStatus]   = useState('idle') // idle | sending | success | error
-  const [copied, setCopied]   = useState(false)
+  const [hovered, setHovered]       = useState(null)
+  const [form, setForm]             = useState({ name: '', email: '', confirmEmail: '', project: '', message: '' })
+  const [status, setStatus]         = useState('idle') // idle | sending | success | error
+  const [copied, setCopied]         = useState(false)
+  const [sentEmail, setSentEmail]   = useState('')
+
+  const emailMatch  = form.email && form.confirmEmail && form.email === form.confirmEmail
+  const emailNoMatch = form.confirmEmail.length > 0 && form.email !== form.confirmEmail
 
   const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }))
 
   const handleSubmit = async e => {
     e.preventDefault()
+    if (form.email !== form.confirmEmail) return
     setStatus('sending')
+    setSentEmail(form.email)
     try {
       const res = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
@@ -42,7 +48,7 @@ export default function Contact() {
       const data = await res.json()
       if (data.success) {
         setStatus('success')
-        setForm({ name: '', email: '', project: '', message: '' })
+        setForm({ name: '', email: '', confirmEmail: '', project: '', message: '' })
       } else {
         setStatus('error')
       }
@@ -164,10 +170,17 @@ export default function Contact() {
                 <h3 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 20, color: 'var(--text)', margin: '16px 0 8px' }}>
                   Message Sent!
                 </h3>
-                <p style={{ color: 'var(--muted)', fontSize: 14 }}>
+                <p style={{ color: 'var(--muted)', fontSize: 14, marginBottom: 8 }}>
                   I'll get back to you within 24 hours.
                 </p>
-                <button onClick={() => setStatus('idle')} style={{ ...s.submitBtn, marginTop: 24, width: 'auto', padding: '10px 24px' }}>
+                <div style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid var(--gold-border)', borderRadius: 8, padding: '10px 16px', fontSize: 13 }}>
+                  <span style={{ color: 'var(--muted)' }}>Reply will be sent to: </span>
+                  <span style={{ color: 'var(--gold)', fontWeight: 700 }}>{sentEmail}</span>
+                </div>
+                <p style={{ color: 'var(--muted)', fontSize: 12, marginTop: 6 }}>
+                  Wrong email? Send again with the correct one.
+                </p>
+                <button onClick={() => setStatus('idle')} style={{ ...s.submitBtn, marginTop: 16, width: 'auto', padding: '10px 24px' }}>
                   Send Another
                 </button>
               </div>
@@ -198,6 +211,30 @@ export default function Contact() {
                       onBlur={e  => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
                     />
                   </div>
+                </div>
+
+                <div style={s.fieldGroup}>
+                  <label style={s.label} htmlFor="cf-confirm-email">
+                    Confirm Email
+                    {emailMatch    && <span style={{ color: '#4ADE80', marginLeft: 8 }}>✓ Emails match</span>}
+                    {emailNoMatch  && <span style={{ color: '#EF5350', marginLeft: 8 }}>✗ Emails don't match</span>}
+                  </label>
+                  <input
+                    id="cf-confirm-email" name="confirmEmail" type="email" required
+                    value={form.confirmEmail} onChange={handleChange}
+                    placeholder="Re-enter your email"
+                    style={{
+                      ...s.input,
+                      borderColor: emailNoMatch ? '#EF5350' : emailMatch ? '#4ADE80' : 'rgba(255,255,255,0.1)',
+                    }}
+                    onFocus={e => { if (!emailNoMatch && !emailMatch) e.target.style.borderColor = 'var(--gold)' }}
+                    onBlur={e  => { if (!emailNoMatch && !emailMatch) e.target.style.borderColor = 'rgba(255,255,255,0.1)' }}
+                  />
+                  {emailNoMatch && (
+                    <p style={{ color: '#EF5350', fontSize: 12, marginTop: 4 }}>
+                      Please make sure both email addresses are the same.
+                    </p>
+                  )}
                 </div>
 
                 <div style={s.fieldGroup}>
@@ -236,10 +273,10 @@ export default function Contact() {
                   </p>
                 )}
 
-                <button type="submit" disabled={status === 'sending'} style={{
+                <button type="submit" disabled={status === 'sending' || emailNoMatch || !emailMatch} style={{
                   ...s.submitBtn,
-                  opacity: status === 'sending' ? 0.7 : 1,
-                  cursor: status === 'sending' ? 'not-allowed' : 'pointer',
+                  opacity: (status === 'sending' || emailNoMatch || !emailMatch) ? 0.5 : 1,
+                  cursor: (status === 'sending' || emailNoMatch || !emailMatch) ? 'not-allowed' : 'pointer',
                 }}>
                   {status === 'sending' ? (
                     <>
