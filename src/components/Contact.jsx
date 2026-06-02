@@ -110,7 +110,7 @@ export default function Contact() {
   }
 
   const copyEmail = () => {
-    navigator.clipboard.writeText('shaikhshafik987@gmail.com')
+    navigator.clipboard.writeText('safik.tech@gmail.com')
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -150,7 +150,7 @@ export default function Contact() {
         </div>
 
         {/* Contact form + info */}
-        <div style={s.grid}>
+        <div style={s.grid} className="contact-grid">
 
           {/* Left — info */}
           <div style={s.infoCol}>
@@ -168,13 +168,13 @@ export default function Contact() {
               <div>
                 <p style={s.infoLabel}>Email</p>
                 <a
-                  href="mailto:shaikhshafik987@gmail.com?subject=Freelance Project Inquiry"
+                  href="mailto:safik.tech@gmail.com?subject=Freelance Project Inquiry"
                   style={{ ...s.infoValue, color: 'var(--gold)', cursor: 'pointer', textDecoration: 'none', transition: 'opacity 0.2s', display: 'block' }}
                   onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
                   onMouseLeave={e => e.currentTarget.style.opacity = '1'}
                   title="Open in mail app"
                 >
-                  shaikhshafik987@gmail.com
+                  safik.tech@gmail.com
                 </a>
               </div>
               <button onClick={copyEmail} style={s.copyBtn} title="Copy email">
@@ -248,7 +248,7 @@ export default function Contact() {
               <form onSubmit={handleSubmit} style={s.form}>
                 <h3 style={s.formTitle}>Send a Message</h3>
 
-                <div style={s.row}>
+                <div style={s.row} className="form-row">
                   <div style={s.fieldGroup}>
                     <label style={s.label} htmlFor="cf-name">Your Name</label>
                     <input
@@ -399,7 +399,7 @@ export default function Contact() {
 
                 {status === 'error' && (
                   <p style={s.errorMsg}>
-                    Something went wrong. Please email me directly at shaikhshafik987@gmail.com
+                    Something went wrong. Please email me directly at safik.tech@gmail.com
                   </p>
                 )}
 

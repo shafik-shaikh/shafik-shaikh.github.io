@@ -69,7 +69,7 @@ export default function CryptoTracker() {
       `}</style>
       <Navbar />
 
-      <div style={s.container}>
+      <div style={s.container} className="demo-container">
         {/* Header */}
         <div style={s.header}>
           <div>
@@ -107,7 +107,7 @@ export default function CryptoTracker() {
             <p style={{ color: 'var(--muted)', marginTop: 16 }}>Fetching live prices...</p>
           </div>
         ) : (
-          <div style={s.layout}>
+          <div style={s.layout} className="crypto-layout">
             {/* Coin List */}
             <div style={s.coinList}>
               {coins.map(coin => {
@@ -172,7 +172,7 @@ export default function CryptoTracker() {
                   </div>
                 )}
 
-                <div style={s.statsGrid}>
+                <div style={s.statsGrid} className="crypto-stats">
                   {[
                     { label: 'Market Cap', value: fmt(selectedCoin.market_cap) },
                     { label: '24h High', value: fmt(selectedCoin.high_24h) },

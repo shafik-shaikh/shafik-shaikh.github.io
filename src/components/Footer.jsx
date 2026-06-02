@@ -1,7 +1,7 @@
 export default function Footer() {
   return (
     <footer style={s.footer}>
-      <div style={s.inner}>
+      <div style={s.inner} className="footer-inner">
         <div style={s.left}>
           <span style={s.logo}>MS<span style={{ color: 'var(--gold)' }}>.</span></span>
           <p style={s.copy}>© {new Date().getFullYear()} Mohammadsafik Shaikh. All rights reserved.</p>
@@ -10,7 +10,7 @@ export default function Footer() {
           {[
             { label: 'GitHub', href: 'https://github.com/shafik-shaikh' },
             { label: 'LinkedIn', href: 'https://www.linkedin.com/in/shafik-shaikh' },
-            { label: 'Email', href: 'mailto:shaikhshafik987@gmail.com' },
+            { label: 'Email', href: 'mailto:safik.tech@gmail.com' },
           ].map(l => (
             <a
               key={l.label}

@@ -76,7 +76,7 @@ function DbIcon() { return <svg width="16" height="16" viewBox="0 0 24 24" fill=
 
 const s = {
   section: { padding: '90px 24px', background: 'var(--bg-card)' },
-  inner: { maxWidth: 1100, margin: '0 auto' },
+  inner: { maxWidth: 1100, margin: '0 auto', padding: '0' },
   sub: { color: 'var(--gold)', fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 10 },
   title: { fontFamily: 'Orbitron, sans-serif', fontSize: 38, fontWeight: 800, color: 'var(--text)', marginBottom: 12, letterSpacing: -1 },
   desc: { color: 'var(--muted)', fontSize: 15, marginBottom: 48 },

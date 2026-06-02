@@ -1,0 +1,67 @@
+/* ─── Responsive Overrides ───────────────────────────────────────────── */
+
+/* ── Tablet (max 1024px) ── */
+@media (max-width: 1024px) {
+  .hero-grid {
+    grid-template-columns: 1fr !important;
+    gap: 40px !important;
+  }
+  .hero-terminal { display: none !important; }
+  .hero-name     { font-size: 42px !important; }
+  .stats-grid    { grid-template-columns: repeat(2, 1fr) !important; }
+
+  .contact-grid  { grid-template-columns: 1fr !important; }
+  .crypto-layout { grid-template-columns: 1fr !important; }
+  .stock-layout  { grid-template-columns: 1fr !important; }
+  .stock-metrics { flex-wrap: wrap !important; }
+
+  .demo-container { padding: 90px 16px 32px !important; }
+}
+
+/* ── Mobile (max 768px) ── */
+@media (max-width: 768px) {
+  /* Hero */
+  .hero-section  { padding: 80px 16px 32px !important; }
+  .hero-name     { font-size: 34px !important; letter-spacing: -0.5px !important; }
+  .hero-typing   { font-size: 15px !important; }
+  .hero-desc     { font-size: 14px !important; }
+  .hero-cta      { flex-wrap: wrap !important; }
+  .hero-cta a    { flex: 1 1 140px; text-align: center; justify-content: center !important; }
+  .stats-grid    { grid-template-columns: repeat(2, 1fr) !important; }
+  .stat-num      { font-size: 26px !important; }
+
+  /* Sections */
+  .section-title { font-size: 28px !important; }
+  .section-inner { padding: 60px 16px !important; }
+
+  /* Navbar */
+  .desktop-nav   { display: none !important; }
+
+  /* Contact */
+  .contact-grid  { grid-template-columns: 1fr !important; }
+  .form-row      { grid-template-columns: 1fr !important; }
+  .contact-cta-box { flex-direction: column !important; }
+
+  /* Demos */
+  .crypto-layout  { grid-template-columns: 1fr !important; }
+  .crypto-stats   { grid-template-columns: repeat(2, 1fr) !important; }
+  .stock-layout   { grid-template-columns: 1fr !important; }
+  .stock-metrics  { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; }
+  .stock-range    { flex-direction: column !important; align-items: flex-start !important; }
+  .stock-ohlc     { display: none !important; }
+  .demo-container { padding: 90px 12px 24px !important; }
+
+  /* Footer */
+  .footer-inner  { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; }
+}
+
+/* ── Small mobile (max 480px) ── */
+@media (max-width: 480px) {
+  .hero-name   { font-size: 28px !important; }
+  .stats-grid  { grid-template-columns: repeat(2, 1fr) !important; }
+  .hero-badge  { font-size: 11px !important; }
+  .cert-row    { gap: 6px !important; }
+  .cert-badge  { font-size: 10px !important; padding: 3px 8px !important; }
+
+  .crypto-stats { grid-template-columns: repeat(2, 1fr) !important; }
+}

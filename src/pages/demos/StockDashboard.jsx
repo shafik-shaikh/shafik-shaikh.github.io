@@ -183,7 +183,7 @@ export default function StockDashboard() {
       `}</style>
       <Navbar />
 
-      <div style={s.container}>
+      <div style={s.container} className="demo-container">
         {/* Page Header */}
         <div style={s.topBar}>
           <div>
@@ -202,7 +202,7 @@ export default function StockDashboard() {
           </span>
         </div>
 
-        <div style={s.layout}>
+        <div style={s.layout} className="stock-layout">
           {/* Left Column */}
           <div style={s.leftCol}>
 
@@ -295,7 +295,7 @@ export default function StockDashboard() {
             </div>
 
             {/* Key Metrics */}
-            <div style={s.metricsRow}>
+            <div style={s.metricsRow} className="stock-metrics">
               {[
                 { label: 'Open',    value: `$${ohlc[ohlc.length - 1].open.toFixed(2)}` },
                 { label: 'High',    value: `$${ohlc[ohlc.length - 1].high.toFixed(2)}`, color: '#26A69A' },
