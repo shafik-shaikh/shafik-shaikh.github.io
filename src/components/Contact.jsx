@@ -41,11 +41,9 @@ export default function Contact() {
         `https://emailvalidation.abstractapi.com/v1/?api_key=${ABSTRACT_EMAIL_KEY}&email=${encodeURIComponent(form.email)}`
       )
       const data = await res.json()
-      const deliverable = data.deliverability === 'DELIVERABLE'
-      const mxFound     = data.is_mx_found?.value === true
-      if (deliverable || mxFound)                    setEmailVerify('valid')
+      if (data.deliverability === 'DELIVERABLE')      setEmailVerify('valid')
       else if (data.deliverability === 'UNDELIVERABLE') setEmailVerify('invalid')
-      else                                            setEmailVerify('unknown')
+      else                                            setEmailVerify('unknown') // UNKNOWN = allow (can't confirm)
     } catch {
       setEmailVerify('unknown')
     }
