@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-// ── Replace this with your Formspree endpoint after signing up at formspree.io ──
-const FORMSPREE_URL = 'https://formspree.io/f/xpwzgkba'
+// ── Paste your Web3Forms access key here (get it free at web3forms.com) ──
+const WEB3FORMS_KEY = '9b6d9035-1122-469e-8499-5ff04f048756'
 
 const services = [
   { title: 'Fintech Dashboards', desc: 'Trading platforms, crypto trackers, portfolio managers' },
@@ -29,12 +29,18 @@ export default function Contact() {
     e.preventDefault()
     setStatus('sending')
     try {
-      const res = await fetch(FORMSPREE_URL, {
+      const res = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          access_key: WEB3FORMS_KEY,
+          subject: `New Freelance Inquiry: ${form.project}`,
+          from_name: form.name,
+          ...form,
+        }),
       })
-      if (res.ok) {
+      const data = await res.json()
+      if (data.success) {
         setStatus('success')
         setForm({ name: '', email: '', project: '', message: '' })
       } else {
