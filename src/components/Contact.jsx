@@ -1,14 +1,55 @@
 import { useState } from 'react'
 
+// ── Replace this with your Formspree endpoint after signing up at formspree.io ──
+const FORMSPREE_URL = 'https://formspree.io/f/xpwzgkba'
+
 const services = [
-  { icon: '◈', title: 'Fintech Dashboards', desc: 'Trading platforms, crypto trackers, portfolio managers' },
-  { icon: '◈', title: 'Cloud Architecture', desc: 'AWS & Azure setup, serverless, CI/CD pipelines' },
-  { icon: '◈', title: 'Full Stack Apps', desc: 'React + Node.js + MySQL / DynamoDB web applications' },
-  { icon: '◈', title: 'E-Commerce', desc: 'Online stores, payment integration, product management' },
+  { title: 'Fintech Dashboards', desc: 'Trading platforms, crypto trackers, portfolio managers' },
+  { title: 'Cloud Architecture', desc: 'AWS & Azure setup, serverless, CI/CD pipelines' },
+  { title: 'Full Stack Apps', desc: 'React + Node.js + MySQL / DynamoDB web applications' },
+  { title: 'E-Commerce', desc: 'Online stores, payment integration, product management' },
+]
+
+const ICONS = [
+  <><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></>,
+  <><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></>,
+  <><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></>,
+  <><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></>,
 ]
 
 export default function Contact() {
   const [hovered, setHovered] = useState(null)
+  const [form, setForm]       = useState({ name: '', email: '', project: '', message: '' })
+  const [status, setStatus]   = useState('idle') // idle | sending | success | error
+  const [copied, setCopied]   = useState(false)
+
+  const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }))
+
+  const handleSubmit = async e => {
+    e.preventDefault()
+    setStatus('sending')
+    try {
+      const res = await fetch(FORMSPREE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(form),
+      })
+      if (res.ok) {
+        setStatus('success')
+        setForm({ name: '', email: '', project: '', message: '' })
+      } else {
+        setStatus('error')
+      }
+    } catch {
+      setStatus('error')
+    }
+  }
+
+  const copyEmail = () => {
+    navigator.clipboard.writeText('shaikhshafik987@gmail.com')
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   return (
     <section id="contact" style={s.section}>
@@ -22,6 +63,7 @@ export default function Contact() {
           Open to freelance projects worldwide. Fast delivery, clean code, and real results.
         </p>
 
+        {/* Services */}
         <div style={s.servicesGrid}>
           {services.map((sv, i) => (
             <div
@@ -29,52 +71,186 @@ export default function Contact() {
               style={{
                 ...s.serviceCard,
                 borderColor: hovered === i ? 'var(--gold-border)' : 'var(--border)',
-                background: hovered === i ? 'var(--gold-dim)' : 'var(--bg)',
+                background:  hovered === i ? 'var(--gold-dim)'    : 'var(--bg)',
               }}
               onMouseEnter={() => setHovered(i)}
               onMouseLeave={() => setHovered(null)}
             >
-              <span style={{ color: 'var(--gold)', fontSize: 20, marginBottom: 8, display: 'block' }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2" strokeLinecap="round">
-                  {i === 0 && <><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></>}
-                  {i === 1 && <><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></>}
-                  {i === 2 && <><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></>}
-                  {i === 3 && <><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></>}
-                </svg>
-              </span>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2" strokeLinecap="round" style={{ marginBottom: 10, display: 'block' }}>
+                {ICONS[i]}
+              </svg>
               <h4 style={s.serviceTitle}>{sv.title}</h4>
               <p style={s.serviceDesc}>{sv.desc}</p>
             </div>
           ))}
         </div>
 
-        <div style={s.ctaBox}>
-          <div style={s.ctaLeft}>
-            <h3 style={s.ctaHeading}>Ready to start?</h3>
-            <p style={s.ctaText}>Drop me an email and let's discuss your project.</p>
-            <div style={s.contactInfo}>
-              <a href="mailto:shaikhshafik987@gmail.com" style={s.emailLink}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2" strokeLinecap="round">
+        {/* Contact form + info */}
+        <div style={s.grid}>
+
+          {/* Left — info */}
+          <div style={s.infoCol}>
+            <h3 style={s.infoHeading}>Get in Touch</h3>
+            <p style={s.infoText}>
+              Fill the form or reach me directly. I reply within 24 hours.
+            </p>
+
+            <div style={s.infoItem}>
+              <div style={s.infoIconBox}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2" strokeLinecap="round">
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
                 </svg>
-                shaikhshafik987@gmail.com
-              </a>
+              </div>
+              <div>
+                <p style={s.infoLabel}>Email</p>
+                <p style={s.infoValue}>shaikhshafik987@gmail.com</p>
+              </div>
+              <button onClick={copyEmail} style={s.copyBtn} title="Copy email">
+                {copied
+                  ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2" strokeLinecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                }
+              </button>
+            </div>
+
+            <div style={s.infoItem}>
+              <div style={s.infoIconBox}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--gold)">
+                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                  <rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>
+                </svg>
+              </div>
+              <div>
+                <p style={s.infoLabel}>LinkedIn</p>
+                <a href="https://www.linkedin.com/in/shafik-shaikh" target="_blank" rel="noreferrer" style={{ ...s.infoValue, color: 'var(--gold)' }}>
+                  linkedin.com/in/shafik-shaikh
+                </a>
+              </div>
+            </div>
+
+            <div style={s.infoItem}>
+              <div style={s.infoIconBox}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2" strokeLinecap="round">
+                  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+                </svg>
+              </div>
+              <div>
+                <p style={s.infoLabel}>GitHub</p>
+                <a href="https://github.com/shafik-shaikh" target="_blank" rel="noreferrer" style={{ ...s.infoValue, color: 'var(--gold)' }}>
+                  github.com/shafik-shaikh
+                </a>
+              </div>
+            </div>
+
+            <div style={s.availBadge}>
+              <span style={s.availDot} />
+              Available for freelance work
             </div>
           </div>
-          <div style={s.ctaRight}>
-            <a href="mailto:shaikhshafik987@gmail.com" style={s.bigBtn}>
-              Send Me a Message
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ marginLeft: 8 }}>
-                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-              </svg>
-            </a>
-            <a href="https://www.linkedin.com/in/shafik-shaikh" target="_blank" rel="noreferrer" style={s.linkedinBtn}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--text)" style={{ marginRight: 8 }}>
-                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
-                <rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>
-              </svg>
-              LinkedIn
-            </a>
+
+          {/* Right — Form */}
+          <div style={s.formCard}>
+            {status === 'success' ? (
+              <div style={s.successBox}>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" strokeWidth="2" strokeLinecap="round">
+                  <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+                </svg>
+                <h3 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 20, color: 'var(--text)', margin: '16px 0 8px' }}>
+                  Message Sent!
+                </h3>
+                <p style={{ color: 'var(--muted)', fontSize: 14 }}>
+                  I'll get back to you within 24 hours.
+                </p>
+                <button onClick={() => setStatus('idle')} style={{ ...s.submitBtn, marginTop: 24, width: 'auto', padding: '10px 24px' }}>
+                  Send Another
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} style={s.form}>
+                <h3 style={s.formTitle}>Send a Message</h3>
+
+                <div style={s.row}>
+                  <div style={s.fieldGroup}>
+                    <label style={s.label} htmlFor="cf-name">Your Name</label>
+                    <input
+                      id="cf-name" name="name" required
+                      value={form.name} onChange={handleChange}
+                      placeholder="John Doe"
+                      style={s.input}
+                      onFocus={e => e.target.style.borderColor = 'var(--gold)'}
+                      onBlur={e  => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+                    />
+                  </div>
+                  <div style={s.fieldGroup}>
+                    <label style={s.label} htmlFor="cf-email">Your Email</label>
+                    <input
+                      id="cf-email" name="email" type="email" required
+                      value={form.email} onChange={handleChange}
+                      placeholder="john@example.com"
+                      style={s.input}
+                      onFocus={e => e.target.style.borderColor = 'var(--gold)'}
+                      onBlur={e  => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+                    />
+                  </div>
+                </div>
+
+                <div style={s.fieldGroup}>
+                  <label style={s.label} htmlFor="cf-project">Project Type</label>
+                  <select
+                    id="cf-project" name="project" required
+                    value={form.project} onChange={handleChange}
+                    style={{ ...s.input, cursor: 'pointer' }}
+                    onFocus={e => e.target.style.borderColor = 'var(--gold)'}
+                    onBlur={e  => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+                  >
+                    <option value="" disabled>Select a service...</option>
+                    <option value="Fintech Dashboard">Fintech / Trading Dashboard</option>
+                    <option value="Cloud Architecture">Cloud Architecture (AWS / Azure)</option>
+                    <option value="Full Stack App">Full Stack Web App</option>
+                    <option value="E-Commerce">E-Commerce Website</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div style={s.fieldGroup}>
+                  <label style={s.label} htmlFor="cf-message">Message</label>
+                  <textarea
+                    id="cf-message" name="message" required rows={4}
+                    value={form.message} onChange={handleChange}
+                    placeholder="Tell me about your project, budget, and timeline..."
+                    style={{ ...s.input, resize: 'vertical', minHeight: 110 }}
+                    onFocus={e => e.target.style.borderColor = 'var(--gold)'}
+                    onBlur={e  => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+                  />
+                </div>
+
+                {status === 'error' && (
+                  <p style={s.errorMsg}>
+                    Something went wrong. Please email me directly at shaikhshafik987@gmail.com
+                  </p>
+                )}
+
+                <button type="submit" disabled={status === 'sending'} style={{
+                  ...s.submitBtn,
+                  opacity: status === 'sending' ? 0.7 : 1,
+                  cursor: status === 'sending' ? 'not-allowed' : 'pointer',
+                }}>
+                  {status === 'sending' ? (
+                    <>
+                      <span style={s.btnSpinner} />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      Send Message
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ marginLeft: 8 }}>
+                        <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                      </svg>
+                    </>
+                  )}
+                </button>
+              </form>
+            )}
           </div>
         </div>
       </div>
@@ -84,45 +260,82 @@ export default function Contact() {
 
 const s = {
   section: { padding: '90px 24px', background: 'var(--bg-card)' },
-  inner: { maxWidth: 1100, margin: '0 auto' },
-  sub: { color: 'var(--gold)', fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 10 },
+  inner:   { maxWidth: 1100, margin: '0 auto' },
+  sub:   { color: 'var(--gold)', fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 10 },
   title: { fontFamily: 'Orbitron, sans-serif', fontSize: 38, fontWeight: 800, color: 'var(--text)', marginBottom: 16, letterSpacing: -1, lineHeight: 1.2 },
-  desc: { color: 'var(--muted)', fontSize: 15, marginBottom: 48 },
-  servicesGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16, marginBottom: 48 },
-  serviceCard: {
-    padding: '22px', borderRadius: 10, border: '1px solid',
-    transition: 'all 0.25s',
-  },
+  desc:  { color: 'var(--muted)', fontSize: 15, marginBottom: 48 },
+
+  servicesGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16, marginBottom: 56 },
+  serviceCard:  { padding: '22px', borderRadius: 10, border: '1px solid', transition: 'all 0.25s', cursor: 'default' },
   serviceTitle: { fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 6 },
-  serviceDesc: { color: 'var(--muted)', fontSize: 12, lineHeight: 1.6 },
-  ctaBox: {
-    background: 'var(--bg)', borderRadius: 16, padding: '40px',
-    border: '1px solid var(--border)',
-    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-    gap: 32, flexWrap: 'wrap',
+  serviceDesc:  { color: 'var(--muted)', fontSize: 12, lineHeight: 1.6 },
+
+  grid:    { display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 32, alignItems: 'start' },
+  infoCol: { display: 'flex', flexDirection: 'column', gap: 24 },
+  infoHeading: { fontFamily: 'Orbitron, sans-serif', fontSize: 22, fontWeight: 800, color: 'var(--text)' },
+  infoText:    { color: 'var(--muted)', fontSize: 14, lineHeight: 1.7, marginTop: -8 },
+
+  infoItem:   { display: 'flex', alignItems: 'center', gap: 14 },
+  infoIconBox: {
+    width: 42, height: 42, borderRadius: 10, flexShrink: 0,
+    background: 'var(--gold-dim)', border: '1px solid var(--gold-border)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
   },
-  ctaLeft: { flex: 1 },
-  ctaHeading: { fontFamily: 'Orbitron, sans-serif', fontSize: 24, fontWeight: 800, color: 'var(--text)', marginBottom: 8 },
-  ctaText: { color: 'var(--muted)', fontSize: 14 },
-  contactInfo: { marginTop: 16 },
-  emailLink: {
+  infoLabel: { fontSize: 11, color: 'var(--muted)', fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 2 },
+  infoValue: { fontSize: 13, color: 'var(--text)', fontWeight: 600 },
+  copyBtn: {
+    marginLeft: 'auto', background: 'var(--bg-card)', border: '1px solid var(--border)',
+    borderRadius: 6, width: 30, height: 30,
+    display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+    transition: 'border-color 0.2s', flexShrink: 0,
+  },
+  availBadge: {
     display: 'inline-flex', alignItems: 'center', gap: 8,
-    color: 'var(--gold)', fontSize: 14, fontWeight: 600,
+    background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.2)',
+    color: '#4ADE80', padding: '8px 16px', borderRadius: 20,
+    fontSize: 12, fontWeight: 600, width: 'fit-content',
   },
-  ctaRight: { display: 'flex', gap: 12, flexWrap: 'wrap' },
-  bigBtn: {
+  availDot: {
+    width: 7, height: 7, borderRadius: '50%', background: '#4ADE80',
+    boxShadow: '0 0 6px #4ADE80', display: 'inline-block', animation: 'pulse 2s infinite',
+  },
+
+  formCard: {
+    background: 'var(--bg)', borderRadius: 16, padding: '32px',
+    border: '1px solid var(--border)',
+  },
+  form: { display: 'flex', flexDirection: 'column', gap: 18 },
+  formTitle: { fontFamily: 'Orbitron, sans-serif', fontSize: 18, fontWeight: 700, color: 'var(--text)', marginBottom: 4 },
+  row: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 },
+  fieldGroup: { display: 'flex', flexDirection: 'column', gap: 6 },
+  label: { fontSize: 12, fontWeight: 600, color: 'var(--muted)', letterSpacing: 0.8 },
+  input: {
+    background: 'var(--bg-card)', border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: 8, padding: '11px 14px',
+    color: 'var(--text)', fontSize: 14,
+    outline: 'none', width: '100%',
+    transition: 'border-color 0.2s',
+    fontFamily: 'Exo 2, sans-serif',
+  },
+  errorMsg: {
+    background: 'rgba(239,83,80,0.1)', border: '1px solid rgba(239,83,80,0.3)',
+    color: '#EF5350', padding: '10px 14px', borderRadius: 8, fontSize: 13,
+  },
+  submitBtn: {
     background: 'var(--gold)', color: '#0F172A',
-    padding: '14px 28px', borderRadius: 8,
+    padding: '13px 28px', borderRadius: 8, width: '100%',
     fontSize: 14, fontWeight: 700, border: 'none',
-    display: 'inline-flex', alignItems: 'center',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
     boxShadow: '0 4px 20px rgba(245,158,11,0.35)',
     transition: 'opacity 0.2s',
   },
-  linkedinBtn: {
-    border: '1px solid var(--border)', color: 'var(--text)',
-    background: 'transparent', padding: '14px 24px', borderRadius: 8,
-    fontSize: 14, fontWeight: 600,
-    display: 'inline-flex', alignItems: 'center',
-    transition: 'border-color 0.2s',
+  btnSpinner: {
+    width: 16, height: 16, border: '2px solid rgba(15,23,42,0.3)',
+    borderTopColor: '#0F172A', borderRadius: '50%',
+    animation: 'spin 0.7s linear infinite', marginRight: 8, display: 'inline-block',
+  },
+  successBox: {
+    display: 'flex', flexDirection: 'column', alignItems: 'center',
+    justifyContent: 'center', padding: '40px 20px', textAlign: 'center',
   },
 }
