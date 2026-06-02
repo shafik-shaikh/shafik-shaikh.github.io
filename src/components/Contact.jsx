@@ -167,7 +167,15 @@ export default function Contact() {
               </div>
               <div>
                 <p style={s.infoLabel}>Email</p>
-                <p style={s.infoValue}>shaikhshafik987@gmail.com</p>
+                <a
+                  href="mailto:shaikhshafik987@gmail.com?subject=Freelance Project Inquiry"
+                  style={{ ...s.infoValue, color: 'var(--gold)', cursor: 'pointer', textDecoration: 'none', transition: 'opacity 0.2s', display: 'block' }}
+                  onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
+                  onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                  title="Open in mail app"
+                >
+                  shaikhshafik987@gmail.com
+                </a>
               </div>
               <button onClick={copyEmail} style={s.copyBtn} title="Copy email">
                 {copied
