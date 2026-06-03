@@ -24,7 +24,7 @@ export default function Contact() {
   const [status, setStatus]           = useState('idle') // idle | sending | success | error
   const [copied, setCopied]           = useState(false)
   const [sentEmail, setSentEmail]     = useState('')
-  const [emailVerify, setEmailVerify] = useState('idle') // idle | checking | valid | invalid | unknown
+  const [emailVerify, setEmailVerify] = useState('idle') // idle | checking | valid | invalid | unknown | catchall
   const [phoneVerify, setPhoneVerify] = useState('idle') // idle | checking | valid | invalid
 
   const emailRegex     = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,6}$/
@@ -41,7 +41,8 @@ export default function Contact() {
         `https://emailvalidation.abstractapi.com/v1/?api_key=${ABSTRACT_EMAIL_KEY}&email=${encodeURIComponent(form.email)}`
       )
       const data = await res.json()
-      if (data.deliverability === 'DELIVERABLE')      setEmailVerify('valid')
+      if (data.deliverability === 'DELIVERABLE' && !data.is_catchall_email) setEmailVerify('valid')
+      else if (data.deliverability === 'DELIVERABLE' && data.is_catchall_email) setEmailVerify('catchall')
       else if (data.deliverability === 'UNDELIVERABLE') setEmailVerify('invalid')
       else                                            setEmailVerify('unknown') // UNKNOWN = allow (can't confirm)
     } catch {
@@ -266,6 +267,7 @@ export default function Contact() {
                       {emailVerify === 'valid'       && <span style={{ color: '#4ADE80',   marginLeft: 8 }}>✓ Email verified</span>}
                       {emailVerify === 'invalid'     && <span style={{ color: '#EF5350',   marginLeft: 8 }}>✗ Email does not exist</span>}
                       {emailVerify === 'unknown'     && <span style={{ color: '#F59E0B',   marginLeft: 8 }}>⚠ Could not verify</span>}
+                      {emailVerify === 'catchall'    && <span style={{ color: '#F59E0B',   marginLeft: 8 }}>⚠ Please double-check</span>}
                     </label>
                     <input
                       id="cf-email" name="email" type="email" required
@@ -275,10 +277,11 @@ export default function Contact() {
                       style={{
                         ...s.input,
                         borderColor:
-                          emailBadFormat             ? '#EF5350' :
-                          emailVerify === 'valid'    ? '#4ADE80' :
-                          emailVerify === 'invalid'  ? '#EF5350' :
-                          emailVerify === 'checking' ? 'var(--gold)' :
+                          emailBadFormat               ? '#EF5350' :
+                          emailVerify === 'valid'      ? '#4ADE80' :
+                          emailVerify === 'invalid'    ? '#EF5350' :
+                          emailVerify === 'catchall'   ? '#F59E0B' :
+                          emailVerify === 'checking'   ? 'var(--gold)' :
                           'rgba(255,255,255,0.1)',
                       }}
                     />
@@ -290,6 +293,11 @@ export default function Contact() {
                     {emailVerify === 'invalid' && (
                       <p style={{ color: '#EF5350', fontSize: 12, marginTop: 4 }}>
                         This email address does not exist. Please check and try again.
+                      </p>
+                    )}
+                    {emailVerify === 'catchall' && (
+                      <p style={{ color: '#F59E0B', fontSize: 12, marginTop: 4 }}>
+                        Your domain accepts all addresses — please make sure you typed it correctly.
                       </p>
                     )}
                   </div>
